@@ -21,18 +21,18 @@ We give the specifications of a software system that manages thesis and technica
 
 \section{User Authentication}
 
-Users are identified into two groups: faculty members, and students. Every user of the system must authenticate themselves with a unique user ID and a password. The login credentials of the users can be integrated with the current LDAP system. Users logged in as faculty members have the previlage of adding comments or making corrections in the reports and thesis of students. Student users can only view the reports and cannot make any corrections.
+Users are identified into two groups: faculty members and students. Every user of the system is authenticated with a unique user ID and password. The login credentials of the users can be integrated with the current LDAP system. Users logged in as faculty members have the priviledge of adding comments or making corrections in the reports and thesis of students. Student users can only view the reports and comment on it but cannot make any corrections.
 
 \section{Thesis and Technical Report submission}
 
-Both student and faculty member users are allowed to submit technical reports and only students are allowed to submit thesis. The software system manages reports by faculty and the students differently.
+Both students and faculty members are allowed to submit technical reports but only students are allowed to submit thesis. The software system manages reports by faculty and the students differently.
 \subsection{Faculty Member Reports}
 
-Any report which is submitted by a faculty member is first uploaded in peer review mode. In this mode, a faculty member can request other faculty members (who are chosen by the concerned faculty) to view the report and offer comments/corrections. Notifications regarding this request will be sent to the chosen faculty members. Once the comments and corrections are offered and the relevant changes are made the document is stored in public view mode which allows all the users of the system to access the document.
+Any report which is submitted by a faculty member is first uploaded in peer review mode. In this mode, a faculty member can request other faculty members (who are chosen by the concerned faculty) to view the report and offer comments/corrections. Notifications regarding this request will be sent to the chosen faculty members. Once the comments and corrections are offered and the relevant changes are made, the document is stored in public view mode which allows all the users of the system to access the document.
 
 \subsection{Student Reports and Thesis}
 
-A report submitted by a student is first uploaded in faculty review mode. In this mode, the reports are first reviewed by the faculty advisor of the student, the project/ course guide and the Head of the Department. Once a student, uploads the report notifications are sent to the concerned faculty members. The faculty members review the report and offer comments and corrections. Once, the student is done with the corrections, the faculty members take a look at the corrected copy and if satisfied change the document to public view mode which allows all the users of the system to access the document.
+A report submitted by a student is first uploaded in faculty review mode. In this mode, the reports are first reviewed by the faculty advisor of the student, the project/course guide and the Head of the Department. Once a student uploads the report, notifications are sent to the concerned faculty members. The faculty members review the report and offer comments and corrections. Once, the student is done with the corrections, the faculty members take a look at the corrected copy and if satisfied change the document to public view mode which allows all the users of the system to access the document.
 
 \section{Commenting and Correcting Reports}
 
@@ -48,7 +48,7 @@ Reports are archived in a suitable format and can be efficiently searched based 
 
 \item \textit{Title} A report with the searched title is retrieved and displayed.
 
-\item \textit{Keywords} Each report has a set of key words associated with it which is provided by the author. A report van also be searched based on the keywords. 
+\item \textit{Keywords} Each report has a set of key words associated with it which is provided by the author. A report can also be searched based on the keywords. 
 \end{itemize} 
 
 \section{Additional Information}
