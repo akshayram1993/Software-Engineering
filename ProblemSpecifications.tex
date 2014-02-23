@@ -6,7 +6,7 @@
 \begin{document}
 \title{\textbf{CS3410: Software Engineering Lab}
 \\
-\textbf{Thesis and Technical Report Management System\\Problem Specification}}
+\textbf{Multi disciplinary Q \& A Forum\\Problem Specification}}
 \author{ Aravind S CS11B033 \\
 		 S Akshayaram CS11B057\\
 		 R Srinivasan CS11B059\\
@@ -17,41 +17,56 @@
 
 \maketitle
 
-We give the specifications of a software system that manages thesis and technical reports presented by students and faculty of an University department and offers various services like authentication, efficient retrieval, notifications, and peer reviewing. 
+We give the system specifications of an online platform for asking and answering questions. It is a network of students of the institute who can follow each other, add questions, topics and answers and respond to them by either up-voting or down-voting or by adding comments.
 
 \section{User Authentication}
-
-Users are identified into two groups: faculty members and students. Every user of the system is authenticated with a unique user ID and password. The login credentials of the users can be integrated with the current LDAP system. Users logged in as faculty members have the priviledge of adding comments or making corrections in the reports and thesis of students. Student users can only view the reports and comment on it but cannot make any corrections.
-
-\section{Thesis and Technical Report submission}
-
-Both students and faculty members are allowed to submit technical reports but only students are allowed to submit thesis. The software system manages reports by faculty and the students differently.
-\subsection{Faculty Member Reports}
-
-Any report which is submitted by a faculty member is first uploaded in peer review mode. In this mode, a faculty member can request other faculty members (who are chosen by the concerned faculty) to view the report and offer comments/corrections. Notifications regarding this request will be sent to the chosen faculty members. Once the comments and corrections are offered and the relevant changes are made, the document is stored in public view mode which allows all the users of the system to access the document.
-
-\subsection{Student Reports and Thesis}
-
-A report submitted by a student is first uploaded in faculty review mode. In this mode, the reports are first reviewed by the faculty advisor of the student, the project/course guide and the Head of the Department. Once a student uploads the report, notifications are sent to the concerned faculty members. The faculty members review the report and offer comments and corrections. Once, the student is done with the corrections, the faculty members take a look at the corrected copy and if satisfied change the document to public view mode which allows all the users of the system to access the document.
-
-\section{Commenting and Correcting Reports}
-
-A report in peer review mode or faculty review mode can be corrected by faculty members reviewing the report. Any corrections or comments offered by the faculty members are highlighted in the document and a notification is sent to the concerned user.
-
-\section{Retrieval of Reports and Thesis}
-Reports are archived in a suitable format and can be efficiently searched based on the following parameters.
-
 \begin{itemize}
-\item \textit{Author} Reports can be searched based on a particular author who can either be a student or faculty member and all the reports submitted by the user are retrieved and displayed.
+\item For every user we maintain his/her first name, last name, his roll number which will be his/her user name, a password (which can be integrated with LDAP credentials).
+\item Apart from these, we also maintain a non-empty list of primary e-mail IDs which is stored for password recovery, and for sending updates and notifications to the user.
+\item Each user has a number of credits associated with the account which changes dynamically over time. It is a currency that describes his/her activity and success in the question-answer platform. The credits that a user has is a non-negative integer initialized to 100 when he/she creates an account.
+\item An user is allowed to add topics, questions and answers. User can also add comments to questions and answers. Users can up-vote or down-vote a particular answer or a comment. Users can follow other users. If user $A$ follows user $B$, then user $A$ is notified about the activities of $B$ in the forum which include answers for which $B$ has up-voted/down-voted, answers $B$ added, topics followed by $B$, questions followed by $B$. Users are allowed to follow particular topics or questions.
+\item User can add questions and answer them anonymously. In that case, a question or an answer cannot be linked to a particular user.
+\end{itemize}
 
-\item \textit{Year} If a user searches based on year of submission, then all the reports submitted in a particular year are retrieved and displayed.
 
-\item \textit{Title} A report with the searched title is retrieved and displayed.
+\section{Questions}
+\begin{itemize}
+\item Questions are added by users. Each question is associated with text associated with the question, Date on which question was added, the user who added the question, unique question ID, a set of followers IDs, the topics to which the question belongs, and set of comments.
+\item When a user adds a question, the platform shows set of related questions (using the phrases used in the text) and asks the user whether his question is completely new.
+\item The user is also expected to give a non-empty set of topics to which the question is relevant to. Once the question is posted all the users who are following those topics are notified about the added question.
+\item Each question can be followed by a number of users. For every answer added to the question, all the users who are following the question are notified  about the answer.
+\end{itemize}
+ 
 
-\item \textit{Keywords} Each report has a set of key words associated with it which is provided by the author. A report can also be searched based on the keywords. 
+\section{Answers}
+\begin{itemize}
+\item Answers are again added by users. An answer’s attributes consist of the text associated with it, the date on which it was added by the user, a unique AnswerID, user IDs who have up-voted, set of comments added to the answer.Every answer is a response to exactly one question.
+\item User ID's who have up-voted include the users who have up-voted the answer is a set of users who have viewed the answer and are endorsing it.
+\item For every answer that is added to a question, the asker and the followers of the question are notified about it.
+\item Every up-voted answer receives 10 credits which are added to the user's credits account. An answer which is up-voted by the user who asked the question received 50 credits.
+\end{itemize}
+  
+\section{Topics}
+\begin{itemize}
+\item The set of topics is initialized with Academics, Extra curricular activities (includes Tech-soc and Lit-Soc), Sports, Mess issues, Hostel issues.
+\item Users can create topics; every question must fall under at least one such topic.
+\item A topic has the following attributes: the name, set of users following the topic, a unique TopicID and the date on which a user added the topic.
+\item Once a question is added to the topic all the users who are following it are notified about it.
+
 \end{itemize} 
 
-\section{Additional Information}
-Each submission can be updated with additional information on whether it was published in a journal or presented in a conference and details regarding the journal and the conference.
-   
+\section{Comments}
+\begin{itemize}
+\item The comment consists of the comment text, a unique CommentID, set of users who have up-voted or down-voted the comment.
+\item A comment that is posted under an answer is either a ‘parent’ comment or is a reply to some other comment under the same answer.
+\item Once a comment is added to the answer, the user who added the answer is notified about it.
+
+\end{itemize}
+\section{Crediting system}
+\begin{itemize}
+\item For every question which is added by the user, 10 credits is deducted from the user account.
+\item For every up-vote an answer receives 10 credits are added to the answerer's account. The system does not penalize the user for getting down-voted. If an answer gets up-voted, then the user who added the answer is notified about the user who has up-voted. 
+\item For every follower a question gets, 10 credits are added to the questioner's account. If a question gets followed by an user, the questioner is notified about it.
+\item If an answer is up-voted by the questioner then the 50 credits are added to the answer's account.
+\end{itemize}
 \end{document}
