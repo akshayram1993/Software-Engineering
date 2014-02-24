@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2013.6.1)  23 FEB 2014 13:57
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2013.6.1)  24 FEB 2014 09:11
 entering extended mode
  %&-line parsing enabled.
 **ProblemSpecifications.tex
@@ -494,21 +494,21 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] (./ProblemSpecific
 ations.aux) ) 
 Here is how much of TeX's memory you used:
- 4592 strings out of 495061
- 66144 string characters out of 1182622
+ 4593 strings out of 495061
+ 66153 string characters out of 1182622
  139710 words of memory out of 3000000
  7717 multiletter control sequences out of 15000+50000
  7587 words of font info for 27 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
- 38i,6n,36p,637b,360s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 38i,6n,36p,659b,360s stack positions out of 5000i,500n,10000p,200000b,50000s
 </usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx12.pf
 b></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/sha
 re/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-tex
 live/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-texlive/fonts/t
 ype1/public/amsfonts/cm/cmsy10.pfb>
-Output written on ProblemSpecifications.pdf (3 pages, 76671 bytes).
+Output written on ProblemSpecifications.pdf (3 pages, 77301 bytes).
 PDF statistics:
- 70 PDF objects out of 1000 (max. 8388607)
- 11 named destinations out of 1000 (max. 500000)
+ 71 PDF objects out of 1000 (max. 8388607)
+ 12 named destinations out of 1000 (max. 500000)
  57 words of extra memory for PDF output out of 10000 (max. 10000000)
 
