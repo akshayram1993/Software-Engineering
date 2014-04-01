@@ -1,0 +1,13 @@
+Srinivasan:
+1. Mugging LL(k) and realizing implementation.
+
+Akshayaram:
+1. Get jj file for left recursive grammar.
+2. LR(1) muggings and implementation of LR(1) after Srinivasan
+
+Ramnandan:
+1. First build your code.
+2. LR(1) heavy muggings and implementation of LR(1).
+
+Aravind and Adit:
+1. LR(1) muggings and implementation and ensure that there exists SE in whatever we do.
