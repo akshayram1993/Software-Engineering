@@ -1,6 +1,31 @@
 \documentclass[•]{book}
 \usepackage{amsmath,amssymb}
 \usepackage{algorithm,algorithmic}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fullpage}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=0
+}
 \begin{document}
 
 \title{CS3410: Software Engineering Lab\\ LR(1) parser for JavaCC}
@@ -196,13 +221,763 @@ We now give the algorithm for computing the $Goto1(I,X)$
 \end{algorithmic}
 \end{algorithm}
 
+\subsection{Computing $LR(1)$ item sets}
 Now, we give the algorithm for computing the $LR(1)$ item sets.
 
 \begin{algorithm}
-\caption{Computing $LR(1)$ item sets.}
+\caption{Computing $LR(1)$ item sets}
 \begin{algorithmic}
+\STATE $s_0 \leftarrow Closure1([S' \rightarrow \bullet S, \$]$
+\STATE $C \rightarrow \{s_0\}$
+\REPEAT
+\FOR{each set of items $s \in C$}
+\FOR{each grammar symbol $X$}
+\IF{$Goto1(s,X) \neq \phi$ and $Goto1(s,X) \notin C$}
+\STATE Add $Goto1(s,X)$ to $C$
+\ENDIF 
+\ENDFOR
+\ENDFOR 
+\UNTIL{no more sets can be added to $C$}
+\STATE return $C$ 
 \end{algorithmic}
-\end{algorithm}  	
+\end{algorithm}  
+
+\subsection{$LR(1)$ parser}
+We now give the algorithm for constructing the $LR(1)$ parsing table.
+\begin{algorithm}
+\caption{$LR(1)$ parsing table}
+\begin{algorithmic}
+\STATE $C \leftarrow$ Compute $LR(1)$ item sets
+\IF{$[A \rightarrow \alpha \bullet a,  \beta] \in I_i$ and $Goto1(I_i,a) = I_j$}
+\STATE $action[I_i,a] \leftarrow$ "shift $I_j$"
+\ENDIF
+\IF{$[A \rightarrow \alpha \bullet,  a] \in I_i$ and $A \neq S'$}
+\STATE $action[I_i,a] \leftarrow$ "reduce $A \rightarrow \alpha$"
+\ENDIF
+\IF{$[S \rightarrow S' \bullet,  \$] \in I_i$ }
+\STATE $action[I_i,a] \leftarrow$ "accept"
+\ENDIF
+\IF{$Goto1[I_i,a] = I_j$}	
+\STATE $Goto[I_i,a] = I_j$
+\ENDIF
+\STATE set undefined entries to error.
+\STATE Initial state is $s_0 \leftarrow Closure1([S' \rightarrow \bullet S, \$)$
+\end{algorithmic}
+\end{algorithm}	
+
+\chapter{Class hierarchies and Design Patterns}
+\section{Outline of the code}
+The code for the parser in JavaCC was written in src/org/javacc/parser.The various options that govern the parser like lookahead, debug-enable, etc are taken as input and pushed into a class \texttt{Options}.\\\\We skip over the tokenization portion as it is not relevant to us. We only need to know the API updated by the tokenizer. Before the parser is called, the tokens and productions are updated in global constructs in \texttt{JavaCCGlobals}. The suitable containers for Tokens and Productions can be found in the \texttt{Token} and \texttt{NormalProduction} respectively. Productions supplied in the \texttt{.jj} file to be parsed may be Java code as well in which we have a sub-class for Productions called \texttt{JavaCodeProduction}. A similar case holds for \texttt{BNFProduction} as well.\\\\The RHS's of productions is generically called \texttt{Expansion} which can again be of several types and hence has sub-classes:
+\begin{enumerate}
+\item \texttt{Choice} for \texttt{|} in a RegEx
+\item \texttt{Non-Terminal}
+\item \texttt{OneOrMore} for \texttt{+} in a RegEx
+\item \texttt{RegularExpression}
+\item \texttt{Sequence} for a sequence of any of these
+\item \texttt{ZeroOrMore} for \texttt{*} in a RegEx
+\item \texttt{ZeroOrOne} for \texttt{?} in a RegEx
+\item \texttt{TryBlock} for a try-catch block
+\end{enumerate}
+\noindent For example: \texttt{(<id>+|$\backslash$n)($\backslash$t)*} would throw up firstly a \texttt{Sequence}, the first of which is a \texttt{Choice} of a \texttt{OneOrMore} and a simple token, and the second of which is a \texttt{ZeroOrMore}.\\\\\texttt{RegularExpression} also has similar sub-classes for the same reason and these files are prefixed with an \texttt{R} in their name.\\\\Another notable point is that the code allows for C++-specific constructs as well and this is specifically handled everywhere in the code.\\\\Now, let's walk through a typical run. As always, the \texttt{Main} class begins the process. After some initializations, \texttt{ParseGen} is called (note that there are variants for CPP like \texttt{ParseGenCPP}) after which a Lexer is also generated (using \texttt{LexGen} or \texttt{LexGenCPP}) but we will not delve into the lexing.\\\\\texttt{ParseGen} mainly does some tertiary code dumping amidst which it invokes \texttt{ParseEngine} which is the heart of the parser generator. This file contains functions which build First sets and generate code to do LL(k) parsing. The function \texttt{buildLookaheadChecker()} does this work which has a mini-state machine to generate the suitable lookahead sequences.\\\\Another notable feature is the use of buffers which hold portions of the code which are dumped at requisite points of time. Also, file \texttt{JavaCC.jj} contains the grammar and actions that describe \texttt{JavaCCParser}. When passed as input to \texttt{JavaCCParser} it generates another copy of itself.
+%When we analyzed the code written for the parser in JavaCC we found that predominantly Abstract factory and Factory method used most often.
+
+\section{Class Hierarchies}
+In this section we present the class hierarchies and in the next present the interactions amongst these and observe the various design patterns.
+\begin{center}
+\includegraphics[scale=0.5]{Expansion.png}
+\end{center}
+
+\begin{center}
+\includegraphics[scale=0.5]{NormalProduction.png}
+\end{center}
+
+\begin{center}
+\includegraphics[scale=0.5]{javaCCGlobals.png}
+\end{center}
+
+\begin{center}
+\includegraphics[scale=0.5]{CodeGenerator.png}
+\end{center}
+
+\section{Design Patterns}
+In software engineering, is a generic reusable solution to a commonly occurring problem within a software engineering domain. Design patterns were formally introduced in the book Design Patterns: Elements of reusable Object Oriented Software which was published in 1994 by Gamma et al.\cite{gamma1994}.
+
+Design patterns are broadly classified into structural, creational and behavioral patterns.
+
+As we went through the code in JavaCC parser folder we came across one instance of \textit{Abstract factory} and one instance of \textit{Factory Method} which are explained below.
+\subsection{Abstract Factory}
+According to \cite{gamma1994}, an abstract factory design pattern can be used to provide an interface for creating a family of related or dependent object without specifying the concrete class.
+
+An abstract factory method is used when,
+\begin{enumerate}
+\item a system should be independent of how its products are created, composed, and represented.
+\item a system should be configured with one of multiple families of products.
+\item a family of related product objects is designed to be used together, and you need to enforce this
+constraint.
+\item you want to provide a class library of products, and you want to reveal just their interfaces, not
+their implementations.
+\end{enumerate}   
+
+The class diagram for an abstract factory is as follows:
+
+\begin{center}
+\includegraphics[scale=0.5]{AbstractFactory.png}
+\end{center}
+
+The participants are 
+\begin{itemize}
+\item \textbf{Abstract Factory} declares an interface for operations that create abstract product objects.
+\item \textbf{ConcreteFactory} implements the operations to create concrete product objects.
+\item \textbf{Product} declares an interface for a type of product object.
+\item \textbf{ConcreteProduct} defines a product object to be created by the corresponding concrete factory. It also implements the AbstractProduct interface.
+\item \textbf{Item} uses only interfaces declared by AbstractFactory and AbstractProduct classes.
+
+
+\end{itemize}
+
+\subsection{Factory Method}
+According to \cite{gamma1994}, a factory method is used to define an interface for creating an object, but let subclasses decide which class to instantiate. Factory Method lets a
+class defer instantiation to subclasses.
+ Factory methods are used when:
+ \begin{enumerate}
+ \item A class can't anticipate the class of objects that it must create
+ \item A class wants its subclasses to specify the object or the product it creates.
+ \item Classes delegate responsibility to one of several helper subclasses, and you want to localize the knowledge of
+which helper subclass is the delegate.
+ \end{enumerate}
+ 
+ The class diagram for a Factory Method is as follows.
+ \begin{center}
+ \includegraphics[scale=0.5]{FactoryMethod.png}
+ \end{center}
+ 
+ The participants are:
+ \begin{itemize}
+ \item \textbf{Object}: It defines the interface of the product that the factory method creates
+ \item \textbf{Part:} It defines the interface of the part that the factory method creates.
+
+ \end{itemize}
+
+\subsection{Design Patterns Observed}
+
+We could observe the following design patterns between classes defined in parser folder.
+
+\subsubsection*{Abstract Factory} 
+
+\begin{center}
+\includegraphics[scale=0.4]{AbstractFactory1.png}
+\end{center} 
+
+\subsubsection*{Factory Method}
+\begin{center}
+\includegraphics[scale=0.5]{FactoryMethod1.png}
+\end{center}
+
+\chapter{Code Added}
+We had implemented $LR(1)$ parser for a restricted set of CFG grammars. The CFG grammars that can be currently parsed by the $LR(1)$ parser that we have built are those which do not have a choice in any of the productions.
+
+The file which was earlier implementing the $LL(k)$ parser was the ParseEngine.java and that is where we had made most of the changes. We had defined two new classes called as the Item and ItemSet to construct the $LR(1)$ items.\\
+
+
+We then added functions in the ParseEngine.java file to compute the Closure1, Goto1, build the $LR(1)$ table, constructing the $Goto1$ table and finally for code emission. In essence, we had implemented all the algorithms that have been highlighted in chapter-2. We give the details of all the code added in the appendix.
+
+\chapter*{Appendix}
+\textbf{Item.java}
+\begin{lstlisting}
+
+package org.javacc.parser;
+
+public class Item {
+	private NormalProduction p = new NormalProduction();
+	private int offset = 0;
+	private int la;
+	private boolean isFirst = false;
+	private boolean isLast = false;
+
+	
+	public boolean isFirst() {
+		return isFirst;
+	}
+	public void setFirst(boolean isFirst) {
+		this.isFirst = isFirst;
+	}
+	public boolean isLast() {
+		return isLast;
+	}
+	public void setLast(boolean isLast) {
+		this.isLast = isLast;
+	}
+	public int getOffset() {
+		return offset;
+	}
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+	public NormalProduction getP() {
+		return p;
+	}
+	public void setP(NormalProduction p) {
+		this.p = p;
+	}
+	public int getLa() {
+		return la;
+	}
+	public void setLa(int la) {
+		this.la = la;
+	}
+	
+
+}
+
+\end{lstlisting}
+
+\textbf{ItemSet.java}
+
+\begin{lstlisting}
+package org.javacc.parser;
+
+import java.util.*;
+
+public class ItemSet {
+	private int index;
+	private List<Item> itemSet = new ArrayList<Item>();
+	public List<Item> getItemSet() {
+		return itemSet;
+	}
+	public void setItemSet(List<Item> itemSet) {
+		this.itemSet = itemSet;
+	}
+	public int getIndex() {
+		return index;
+	}
+	public void setIndex(int index) {
+		this.index = index;
+	}
+}
+
+\end{lstlisting}
+
+\textbf{Computing the closure of the $Item_0$}
+
+\begin{lstlisting}
+public ItemSet buildClosure() {
+		boolean flag = false;
+		String lhsNT = "";
+		Set<String> seen = new HashSet<String>();
+		Set<NormalProduction> seen_production = new HashSet<NormalProduction>();
+		
+		Item first = new Item();
+		first.setFirst(true);
+		
+		Item last = new Item();
+		last.setLast(true);
+		
+		ItemSet itemSet = new ItemSet();
+		itemSet.getItemSet().add(first);
+		
+		Item firstItem = new Item();
+		firstItem.setP((NormalProduction)bnfproductions.get(0));
+		firstItem.setOffset(0);
+		firstItem.setLa(0);
+		itemSet.getItemSet().add(firstItem);
+		
+		// TODO: Check for choices on S ->
+		
+		do {
+			flag = false;
+			ItemSet temp = new ItemSet();
+			for(Item i : itemSet.getItemSet()) {
+				if(!i.isFirst() && !i.isLast()) {
+					lhsNT = "";
+					if(i.getOffset() < ((Sequence) i.getP().getExpansion()).units.size() - 1 && ((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 1) instanceof NonTerminal) {
+						// matching the LHS and getting the productions whose hed is same as lhsNT
+						lhsNT += ((NonTerminal)((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 1)).getName();
+						if(((Sequence) i.getP().getExpansion()).units.size() == i.getOffset() + 2) {
+							for(int k = 0; k < bnfproductions.size(); k++) {
+								NormalProduction normalProduction = (NormalProduction)bnfproductions.get(k);
+								if(normalProduction.getLhs().equals(lhsNT)) {
+									Item item = new Item();
+									item.setP(normalProduction);
+									item.setOffset(0);
+									item.setLa(i.getLa());
+									temp.getItemSet().add(item);
+								}								
+							}
+						} else if(((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 2) instanceof NonTerminal) {
+							if(!seen.contains(lhsNT)) {
+								seen.add(lhsNT);
+								flag = true;
+							
+								if (firstSet == null) {
+									firstSet = new boolean[tokenCount];
+								}
+							
+								for (int j = 0; j < tokenCount; j++) {
+									firstSet[j] = false;
+								}
+					
+								genFirstSet((NonTerminal)((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 2));
+							
+								for(int k = 0; k < bnfproductions.size(); k++) {
+									NormalProduction normalProduction = (NormalProduction)bnfproductions.get(k);
+									for (int j = 0; j < tokenCount; j++) {
+										if(normalProduction.getLhs().equals(lhsNT) && firstSet[j] == true) {
+											Item item = new Item();
+											item.setP(normalProduction);
+											item.setOffset(0);
+											item.setLa(j);
+											temp.getItemSet().add(item);
+										}
+									}
+								}
+							}
+						} else {
+							for(int k = 0; k < bnfproductions.size(); k++) {
+								NormalProduction normalProduction = (NormalProduction)bnfproductions.get(k);
+								if(normalProduction.getLhs().equals(lhsNT)) {
+									if(!seen_production.contains(normalProduction)) {								
+										Item item = new Item();
+										item.setP(normalProduction);
+										item.setOffset(0);
+										item.setLa(((RegularExpression)((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 2)).ordinal);
+										temp.getItemSet().add(item);
+										flag = true;
+										seen_production.add(normalProduction);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			itemSet.getItemSet().addAll(temp.getItemSet());
+		} while(flag);
+		
+		return itemSet;
+	}
+\end{lstlisting}
+
+\textbf{Computing Closure of other ItemSets}
+\begin{lstlisting}
+public void buildClosureOthers(ItemSet its) {
+		boolean flag = false;
+		String lhsNT = "";
+		Set<String> seen = new HashSet<String>();
+		Set<NormalProduction> seen_p = new HashSet<NormalProduction>();
+		
+		do {
+			flag = false;
+			ItemSet temp = new ItemSet();
+			for(Item i : its.getItemSet()) {
+				if(!i.isFirst() && !i.isLast()) {
+					lhsNT = "";
+					if(i.getOffset() < ((Sequence) i.getP().getExpansion()).units.size() - 1 && ((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 1) instanceof NonTerminal) {
+						lhsNT += ((NonTerminal)((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 1)).getName();
+						if(((Sequence) i.getP().getExpansion()).units.size() == i.getOffset() + 2) {
+							for(int k = 0; k < bnfproductions.size(); k++) {
+								NormalProduction np = (NormalProduction)bnfproductions.get(k);
+								if(np.getLhs().equals(lhsNT)) {
+									Item item = new Item();
+									item.setP(np);
+									item.setOffset(0);
+									item.setLa(i.getLa());
+									temp.getItemSet().add(item);
+								}								
+							}
+						} else if(((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 2) instanceof NonTerminal) {
+							if(!seen.contains(lhsNT)) {
+								seen.add(lhsNT);
+								flag = true;
+							
+								if (firstSet == null) {
+									firstSet = new boolean[tokenCount];
+								}
+							
+								for (int j = 0; j < tokenCount; j++) {
+									firstSet[j] = false;
+								}
+					
+								genFirstSet((NonTerminal)((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 2));
+							
+								for(int k = 0; k < bnfproductions.size(); k++) {
+									NormalProduction np = (NormalProduction)bnfproductions.get(k);
+									for (int j = 0; j < tokenCount; j++) {
+										if(np.getLhs().equals(lhsNT) && firstSet[j] == true) {
+											Item item = new Item();
+											item.setP(np);
+											item.setOffset(0);
+											item.setLa(j);
+											temp.getItemSet().add(item);
+										}
+									}
+								}
+							}
+						} else {
+							for(int k = 0; k < bnfproductions.size(); k++) {
+								NormalProduction np = (NormalProduction)bnfproductions.get(k);
+								if(np.getLhs().equals(lhsNT)) {
+									if(!seen_p.contains(np)) {								
+										Item item = new Item();
+										item.setP(np);
+										item.setOffset(0);
+										item.setLa(((RegularExpression)((Sequence) i.getP().getExpansion()).units.get(i.getOffset() + 2)).ordinal);
+										temp.getItemSet().add(item);
+										flag = true;
+										seen_p.add(np);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			its.getItemSet().addAll(temp.getItemSet());
+		} while(flag);	
+	}
+\end{lstlisting}
+
+\textbf{Computing Goto for a Non-terminal}
+\begin{lstlisting}
+public ItemSet computeGotoNonTerminal(ItemSet I, String s, boolean using_result) {
+		ItemSet returnedItemSet = new ItemSet();
+		
+		for(Item item : I.getItemSet()) {
+			if(!item.isFirst() && !item.isLast()) {
+				for(int j = 0; j < ((Sequence) item.getP().getExpansion()).units.size(); j++) {
+					if(((Sequence) item.getP().getExpansion()).units.get(j) instanceof NonTerminal) {
+						if(s.equals(((NonTerminal)((Sequence) item.getP().getExpansion()).units.get(j)).getName()) && item.getOffset() == j - 1) {
+							
+							Item newItem = new Item();
+							newItem.setP(item.getP());
+							newItem.setOffset(item.getOffset() + 1);
+							newItem.setLa(item.getLa());
+							returnedItemSet.getItemSet().add(newItem);
+						}
+					}
+				}
+			}
+			
+			if(added_last_item == false && item.isFirst() && s.equals(((NormalProduction)bnfproductions.get(0)).getLhs())) {
+				Item newItem = new Item();
+				newItem.setLast(true);
+				returnedItemSet.getItemSet().add(newItem);
+				
+				if(using_result == true) {
+					added_last_item = true;
+				}
+			}
+		}
+		
+		buildClosureOthers(returnedItemSet);
+		
+		return returnedItemSet;
+	}
+\end{lstlisting}
+\textbf{Computing Goto for terminal}
+\begin{lstlisting}
+public ItemSet computeGotoRegEx(ItemSet I, int ind) {
+		ItemSet ret = new ItemSet();
+		
+		for(Item i : I.getItemSet()) {
+			if(!i.isFirst() && !i.isLast()) {
+				for(int j = 0; j < ((Sequence) i.getP().getExpansion()).units.size(); j++) {
+					if(((Sequence) i.getP().getExpansion()).units.get(j) instanceof RStringLiteral) {
+						if(ind == ((RegularExpression)((Sequence) i.getP().getExpansion()).units.get(j)).ordinal && i.getOffset() == j - 1) {
+						
+							Item h = new Item();
+							h.setP(i.getP());
+							h.setOffset(i.getOffset() + 1);
+							h.setLa(i.getLa());
+							ret.getItemSet().add(h);
+						}
+					}
+				}
+			}
+		}
+		
+		buildClosureOthers(ret);
+		
+		return ret;
+	}
+\end{lstlisting}
+
+\textbf{Computing the Item Sets}
+\begin{lstlisting}
+public void computeItemSets() {
+		ItemSet item_0 = buildClosure();
+		boolean flag = false;
+		int index = 1;
+		
+		item_0.setIndex(0);
+		itemSets.add(item_0);
+		
+		List<ItemSet> temp = new ArrayList<ItemSet>();
+		
+		for(int i = 0; i < bnfproductions.size(); i++) {
+			NormalProduction normalProduction = (NormalProduction)bnfproductions.get(i);
+			if(!NT.contains(normalProduction.getLhs())) {
+				NT.add(normalProduction.getLhs());
+			}
+		}
+		
+		do {
+			flag = false;
+			temp.clear();
+			for(ItemSet itemSet : itemSets) {
+				for(String X : NT) {
+					if(computeGotoNonTerminal(itemSet, X, false).getItemSet().size() != 0 && !ourContains(itemSets, computeGotoNonTerminal(itemSet, X, false))) {
+						ItemSet newItemSet = new ItemSet();
+						newItemSet.getItemSet().addAll(computeGotoNonTerminal(itemSet, X, true).getItemSet());
+						newItemSet.setIndex(index);
+						index++;
+						temp.add(newItemSet);
+						flag = true;
+					}
+				}
+				
+				for(int X = 0; X < tokenCount; X++) {
+					if(computeGotoRegEx(itemSet, X).getItemSet().size() != 0 && !ourContains(itemSets, computeGotoRegEx(itemSet, X))) {
+						ItemSet newItemSet = new ItemSet();
+						newItemSet.getItemSet().addAll(computeGotoRegEx(itemSet, X).getItemSet());
+						newItemSet.setIndex(index);
+						index++;
+						temp.add(newItemSet);
+						flag = true;
+					}
+				}
+			}
+			itemSets.addAll(temp);
+			
+		} while(flag);
+	}
+\end{lstlisting}
+\textbf{Building the parse table}
+\begin{lstlisting}
+public void buildParseTable() {
+		parseTable = new ParseTableEntry[itemSets.size()][tokenCount];
+		
+		for(int i = 0; i < itemSets.size(); i++) {
+			for(int j = 0; j < tokenCount; j++) {
+				parseTable[i][j] = null;
+			}
+		}
+		
+		added_last_item = false;
+		
+		for(ItemSet its : itemSets) {
+			for(Item it : its.getItemSet()) {
+				if(!it.isFirst() && !it.isLast()) {
+					if(it.getOffset() < ((Sequence) it.getP().getExpansion()).units.size() - 1 && ((Sequence) it.getP().getExpansion()).units.get(it.getOffset() + 1) instanceof RegularExpression) {
+						int ordinal = ((RegularExpression)((Sequence) it.getP().getExpansion()).units.get(it.getOffset() + 1)).ordinal;
+						ItemSet targ = computeGotoRegEx(its, ordinal);
+						ParseTableEntry newEntry = new ParseTableEntry();
+						newEntry.s_r_a = 0;
+						newEntry.state = getItemSetIndex(targ);
+						parseTable[its.getIndex()][ordinal] = newEntry;	
+					} else if(it.getOffset() == ((Sequence) it.getP().getExpansion()).units.size() - 1) {
+						ParseTableEntry newEntry = new ParseTableEntry();
+						newEntry.s_r_a = 1;
+						newEntry.p = it.getP();
+						parseTable[its.getIndex()][it.getLa()] = newEntry;
+					}
+				} else if(it.isLast()) {
+					ParseTableEntry newEntry = new ParseTableEntry();
+					newEntry.s_r_a = 2;
+					parseTable[its.getIndex()][0] = newEntry;
+				}
+			}
+		}
+	}	
+}
+\end{lstlisting}
+
+\textbf{Functions for code emission}
+\begin{lstlisting}
+void dumpParseTable() {
+		boolean first_flag = true;
+		
+		added_last_item = false;
+		
+		for(int i = 0; i < itemSets.size(); i++) {
+			for(int j = 0; j < tokenCount; j++) {
+				if(parseTable[i][j] != null) {
+					if(first_flag) {
+							codeGenerator.genCodeLine("\t\t\tif(currentState == " + i + " && kind == " + j + ") {");
+							first_flag = false;
+						} else {
+							codeGenerator.genCodeLine("\t\t\telse if(currentState == " + i + " && kind == " + j + ") {");
+						}
+					if(parseTable[i][j].s_r_a == 0) {
+						codeGenerator.genCodeLine("\t\t\t\tstack.push(" + parseTable[i][j].state + ");\n\t\t\t\tgetNextToken();\n\t\t\t}");
+					} else if(parseTable[i][j].s_r_a == 1) {
+						ItemSet findSet = null;
+						for(ItemSet s : itemSets) {
+							if(s.getIndex() == i) {
+								findSet = s;
+								break;
+							}
+						}
+						
+						codeGenerator.genCodeLine("\t\t\t\tfor(int i = 0; i < " + (((Sequence) parseTable[i][j].p.getExpansion()).units.size() - 1) + "; i++) {\n\t\t\t\t\tstack.pop();\n\t\t\t\t}\n\n\t\t\t\tstack.push(goTo(stack.peek(), \"" + parseTable[i][j].p.getLhs() + "\"));\n\t\t\t}");
+					} else if(parseTable[i][j].s_r_a == 2) {
+						codeGenerator.genCodeLine("\t\t\t\tdone = true;\n\t\t\t}");
+					}
+				}
+			}
+		}
+		
+		codeGenerator.genCodeLine("\t\t\telse {\n\t\t\t\tthrow new ParseException();\n\t\t\t}");
+	}
+	
+	void dumpGotoFunction() {
+		boolean first_flag = true;
+		ItemSet temp = null;
+		
+		added_last_item = false;
+		
+		codeGenerator.genCodeLine("\tpublic static int goTo(int top, String lhs) {");
+		
+		for(ItemSet its : itemSets) {
+			for(String X : NT) {
+				if((temp = (computeGotoNT(its, X, true))).getItemSet().size() != 0) {
+					if(first_flag) {
+						codeGenerator.genCodeLine("\t\tif(top == " + its.getIndex() + " && lhs.equals(\"" + X + "\")) {\n\t\t\treturn " + getItemSetIndex(temp) + ";\n\t\t}");
+						first_flag = false;
+					} else {
+						codeGenerator.genCodeLine("\t\telse if(top == " + its.getIndex() + " && lhs.equals(\"" + X + "\")) {\n\t\t\treturn " + getItemSetIndex(temp) + ";\n\t\t}");
+					}
+				}
+			}
+		}
+		
+		codeGenerator.genCodeLine("\t\telse {\n\t\t\treturn -1;\n\t\t}\n\t}");
+	}
+
+	void buildBaseRoutine(BNFProduction p) {
+		Token t;
+		t = (Token) (p.getReturnTypeTokens().get(0));
+		boolean voidReturn = false;
+		if (t.kind == JavaCCParserConstants.VOID) {
+			voidReturn = true;
+		}
+		String error_ret = null;
+		if (isJavaLanguage) {
+			codeGenerator.printTokenSetup(t);
+			ccol = 1;
+			codeGenerator.printLeadingComments(t);
+			codeGenerator.genCode("  " + staticOpt() + "final "
+					+ (p.getAccessMod() != null ? p.getAccessMod() : "public")
+					+ " ");
+			cline = t.beginLine;
+			ccol = t.beginColumn;
+			codeGenerator.printTokenOnly(t);
+			for (int i = 1; i < p.getReturnTypeTokens().size(); i++) {
+				t = (Token) (p.getReturnTypeTokens().get(i));
+				codeGenerator.printToken(t);
+			}
+			codeGenerator.printTrailingComments(t);
+			codeGenerator.genCode(" " + p.getLhs() + "(");
+			if (p.getParameterListTokens().size() != 0) {
+				codeGenerator.printTokenSetup((Token) (p
+						.getParameterListTokens().get(0)));
+				for (java.util.Iterator it = p.getParameterListTokens()
+						.iterator(); it.hasNext();) {
+					t = (Token) it.next();
+					codeGenerator.printToken(t);
+				}
+				codeGenerator.printTrailingComments(t);
+			}
+			codeGenerator.genCode(")");
+			if (isJavaLanguage) {
+				codeGenerator.genCode(" throws ParseException");
+			}
+
+			for (java.util.Iterator it = p.getThrowsList().iterator(); it
+					.hasNext();) {
+				codeGenerator.genCode(", ");
+				java.util.List name = (java.util.List) it.next();
+				for (java.util.Iterator it2 = name.iterator(); it2.hasNext();) {
+					t = (Token) it2.next();
+					codeGenerator.genCode(t.image);
+				}
+			}
+		} else {
+			error_ret = generateCPPMethodheader(p, t);
+		}
+
+		codeGenerator.genCode(" {");
+
+		if (Options.booleanValue("STOP_ON_FIRST_ERROR") && error_ret != null) {
+			codeGenerator.genCode(error_ret);
+		}
+
+		indentamt = 4;
+		if (Options.getDebugParser()) {
+			codeGenerator.genCodeLine("");
+			codeGenerator.genCodeLine("    trace_call(\""
+					+ JavaCCGlobals.addUnicodeEscapes(p.getLhs()) + "\");");
+			codeGenerator.genCode("    try {");
+			indentamt = 6;
+		}
+		if (!Options.booleanValue("IGNORE_ACTIONS")
+				&& p.getDeclarationTokens().size() != 0) {
+			codeGenerator.printTokenSetup((Token) (p.getDeclarationTokens()
+					.get(0)));
+			cline--;
+			for (Iterator it = p.getDeclarationTokens().iterator(); it
+					.hasNext();) {
+				t = (Token) it.next();
+				codeGenerator.printToken(t);
+			}
+			codeGenerator.printTrailingComments(t);
+		}
+		
+		// Our Base Function code emission
+		
+		codeGenerator.genCodeLine("\n\t\tstack.push(0);\n\t\tgetNextToken();\n\t\tboolean done = false;\n\n\t\twhile(!done) {\n\t\t\tint kind = token.kind;\n\t\t\tcurrentState = stack.peek();");
+		
+		// Call function to dump the parseTable contents
+		dumpParseTable();
+		codeGenerator.genCodeLine("\t\t}");
+		
+		if (p.isJumpPatched() && !voidReturn) {
+			if (isJavaLanguage) {
+				codeGenerator
+						.genCodeLine("    throw new Error(\"Missing return statement in function\");");
+			} else {
+				codeGenerator
+						.genCodeLine("    throw \"Missing return statement in function\";");
+			}
+		}
+		if (Options.getDebugParser()) {
+			if (isJavaLanguage) {
+				codeGenerator.genCodeLine("    } finally {");
+			} else {
+				codeGenerator.genCodeLine("    } catch(...) { }");
+			}
+			codeGenerator.genCodeLine("      trace_return(\""
+					+ JavaCCGlobals.addUnicodeEscapes(p.getLhs()) + "\");");
+			if (isJavaLanguage) {
+				codeGenerator.genCodeLine("    }");
+			}
+		}
+		if (!isJavaLanguage && !voidReturn) {
+			codeGenerator.genCodeLine("assert(false);");
+		}
+
+		if (Options.booleanValue("STOP_ON_FIRST_ERROR")) {
+			codeGenerator.genCodeLine("\n#undef __ERROR_RET__\n");
+		}
+		codeGenerator.genCodeLine("  }");
+		codeGenerator.genCodeLine("");
+
+		// Call function to dump the goto table
+		dumpGotoFunction();
+		codeGenerator.genCodeLine("");
+	}
+\end{lstlisting}
 \bibliographystyle{plain}
 \bibliography{reference.bib} 
 \end{document}

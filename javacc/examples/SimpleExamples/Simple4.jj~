@@ -1,0 +1,40 @@
+PARSER_BEGIN(Simple4)
+
+/** Simple brace matcher. */
+public class Simple4 {
+
+  /** Main entry point. */
+  public static void main(String args[]) throws ParseException {
+    Simple4 parser = new Simple4(System.in);
+    parser.Input();
+  }
+
+}
+
+PARSER_END(Simple4)
+
+/** Root production. */
+void Input() :
+{}
+{
+  MatchedBraces() G()
+}
+
+void G() :
+{}
+{
+  H()+
+}
+
+void H() :
+{}
+{
+  ("\n"|"\r")
+}
+
+/** Brace matching production. */
+void MatchedBraces() :
+{}
+{
+  "{" [ MatchedBraces() ] "}"
+}

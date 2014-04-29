@@ -1,0 +1,7 @@
+package org.javacc.parser;
+
+import java.util.*;
+
+public class ItemSet {
+	public List<Item> itemSet = new ArrayList<Item>();
+}

@@ -110,7 +110,8 @@ public class Expansion {
   }
 
   public String toString() {
-    return "[" + getLine() + "," + getColumn() + " " + System.identityHashCode(this) + " " + getSimpleName() + "]";
+//    return "[" + getLine() + "," + getColumn() + " " + System.identityHashCode(this) + " " + getSimpleName() + "]";
+	  return getSimpleName();
   }
 
   protected static final String eol = System.getProperty("line.separator", "\n");

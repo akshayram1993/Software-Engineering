@@ -5,4 +5,9 @@ Alfred~V Aho, Ravi Sethi, and Jeffrey~D Ullman.
 \newblock {\em Compilers: Principles, Techniques, and Tools}.
 \newblock Addison Wesley, 1985.
 
+\bibitem{gamma1994}
+Erich Gamma, Richard Helm, Ralph Johnson, and John Vlissides.
+\newblock {\em Design patterns: elements of reusable object-oriented software}.
+\newblock Pearson Education, 1994.
+
 \end{thebibliography}

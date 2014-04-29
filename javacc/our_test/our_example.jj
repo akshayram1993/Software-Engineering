@@ -1,0 +1,27 @@
+PARSER_BEGIN(our_example)
+
+/** Simple brace matcher. */
+public class our_example {
+
+  /** Main entry point. */
+  public static void main(String args[]) throws ParseException {
+    our_example parser = new our_example(System.in);
+    parser.S();
+  }
+
+}
+
+PARSER_END(our_example)
+
+/** Root production. */
+void S() :
+{}
+{
+  A() "a"  
+}
+
+void A() :
+{}
+{
+  "a"
+}

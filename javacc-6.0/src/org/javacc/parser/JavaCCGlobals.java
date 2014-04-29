@@ -109,6 +109,8 @@ public class JavaCCGlobals {
    * "NormalProduction".
    */
   static public java.util.List bnfproductions = new java.util.ArrayList();
+  
+  static public java.util.List ourbnfproductions = new java.util.ArrayList();
 
   /**
    * A symbol table of all grammar productions - normal and JAVACODE.  The

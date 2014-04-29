@@ -58,7 +58,7 @@ public class NormalProduction {
   /**
    * The name of the non-terminal of this production.
    */
-  private String lhs;
+  public String lhs;
 
   /**
    * The tokens that make up the return type of this production.
@@ -80,7 +80,7 @@ public class NormalProduction {
   /**
    * The RHS of this production.  Not used for JavaCodeProduction.
    */
-  private Expansion expansion;
+  public Expansion expansion;
 
   /**
    * This boolean flag is true if this production can expand to empty.
@@ -114,6 +114,31 @@ public class NormalProduction {
   private Token firstToken;
 
   protected String eol = System.getProperty("line.separator", "\n");
+  
+  public NormalProduction CopyNormalProduction(NormalProduction p) {
+	  NormalProduction q = new NormalProduction();
+	  q.column = p.column;
+	  q.line = p.line;
+	  q.parents = p.parents;
+	  q.accessMod = p.accessMod;
+	  q.lhs = p.lhs;
+	  q.return_type_tokens = p.return_type_tokens;
+	  q.parameter_list_tokens = p.parameter_list_tokens;
+	  q.throws_list = p.throws_list;
+	  q.expansion = p.expansion;
+	  q.emptyPossible = p.emptyPossible;
+	  q.leftExpansions = p.leftExpansions;
+	  q.leIndex = p.leIndex;
+	  q.walkStatus = p.walkStatus;
+	  q.lastToken = p.lastToken;
+	  q.firstToken = p.firstToken;
+	  q.eol = p.eol;
+	  
+//	  System.out.println("hi sexy: " + q.lhs);
+	  
+	  return q;
+  }
+  
   protected StringBuffer dumpPrefix(int indent) {
     StringBuffer sb = new StringBuffer(128);
     for (int i = 0; i < indent; i++)
