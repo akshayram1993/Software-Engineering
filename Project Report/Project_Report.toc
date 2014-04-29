@@ -1,24 +1,24 @@
-\contentsline {chapter}{\numberline {1}Introduction}{5}
-\contentsline {section}{\numberline {1.1}Context Free Grammars}{5}
-\contentsline {subsection}{\numberline {1.1.1}Derivations}{5}
-\contentsline {section}{\numberline {1.2}Lexical Analyzers and Parsers}{5}
-\contentsline {subsection}{\numberline {1.2.1}Top Down Parsing}{6}
-\contentsline {subsection}{\numberline {1.2.2}Bottom Up Parsing}{6}
-\contentsline {section}{\numberline {1.3}JavaCC}{6}
-\contentsline {chapter}{\numberline {2}LR(1) parsers}{9}
-\contentsline {section}{\numberline {2.1}Preliminaries}{9}
-\contentsline {section}{\numberline {2.2}Shift-Reduce Parsing}{9}
-\contentsline {section}{\numberline {2.3}Computing First of a non-terminal}{9}
-\contentsline {section}{\numberline {2.4}$LR(1)$ items}{11}
-\contentsline {subsection}{\numberline {2.4.1}$Closure1(I)$}{11}
-\contentsline {subsection}{\numberline {2.4.2}$Goto1(I)$}{11}
-\contentsline {subsection}{\numberline {2.4.3}Computing $LR(1)$ item sets}{11}
-\contentsline {subsection}{\numberline {2.4.4}$LR(1)$ parser}{12}
-\contentsline {chapter}{\numberline {3}Class hierarchies and Design Patterns}{13}
-\contentsline {section}{\numberline {3.1}Outline of the code}{13}
-\contentsline {section}{\numberline {3.2}Class Hierarchies}{14}
-\contentsline {section}{\numberline {3.3}Design Patterns}{15}
-\contentsline {subsection}{\numberline {3.3.1}Abstract Factory}{15}
-\contentsline {subsection}{\numberline {3.3.2}Factory Method}{16}
-\contentsline {subsection}{\numberline {3.3.3}Design Patterns Observed}{16}
-\contentsline {chapter}{\numberline {4}Code Added}{19}
+\contentsline {chapter}{\numberline {1}Introduction}{2}
+\contentsline {section}{\numberline {1.1}Context Free Grammars}{2}
+\contentsline {subsection}{\numberline {1.1.1}Derivations}{2}
+\contentsline {section}{\numberline {1.2}Lexical Analyzers and Parsers}{2}
+\contentsline {subsection}{\numberline {1.2.1}Top Down Parsing}{3}
+\contentsline {subsection}{\numberline {1.2.2}Bottom Up Parsing}{3}
+\contentsline {section}{\numberline {1.3}JavaCC}{3}
+\contentsline {chapter}{\numberline {2}LR(1) parsers}{5}
+\contentsline {section}{\numberline {2.1}Preliminaries}{5}
+\contentsline {section}{\numberline {2.2}Shift-Reduce Parsing}{5}
+\contentsline {section}{\numberline {2.3}Computing First of a non-terminal}{5}
+\contentsline {section}{\numberline {2.4}$LR(1)$ items}{7}
+\contentsline {subsection}{\numberline {2.4.1}$Closure1(I)$}{7}
+\contentsline {subsection}{\numberline {2.4.2}$Goto1(I)$}{7}
+\contentsline {subsection}{\numberline {2.4.3}Computing $LR(1)$ item sets}{7}
+\contentsline {subsection}{\numberline {2.4.4}$LR(1)$ parser}{8}
+\contentsline {chapter}{\numberline {3}Class hierarchies and Design Patterns}{9}
+\contentsline {section}{\numberline {3.1}Outline of the code}{9}
+\contentsline {section}{\numberline {3.2}Class Hierarchies}{10}
+\contentsline {section}{\numberline {3.3}Design Patterns}{11}
+\contentsline {subsection}{\numberline {3.3.1}Abstract Factory}{11}
+\contentsline {subsection}{\numberline {3.3.2}Factory Method}{12}
+\contentsline {subsection}{\numberline {3.3.3}Design Patterns Observed}{12}
+\contentsline {chapter}{\numberline {4}Code Added}{14}
