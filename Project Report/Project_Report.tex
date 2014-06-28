@@ -304,35 +304,26 @@ In software engineering, is a generic reusable solution to a commonly occurring 
 
 Design patterns are broadly classified into structural, creational and behavioral patterns.
 
-As we went through the code in JavaCC parser folder we came across one instance of \textit{Abstract factory} and one instance of \textit{Factory Method} which are explained below.
-\subsection{Abstract Factory}
-According to \cite{gamma1994}, an abstract factory design pattern can be used to provide an interface for creating a family of related or dependent object without specifying the concrete class.
+As we went through the code in JavaCC parser folder we came across one instance of \textit{Builder Pattern} and one instance of \textit{Factory Method} which are explained below.
 
-An abstract factory method is used when,
-\begin{enumerate}
-\item a system should be independent of how its products are created, composed, and represented.
-\item a system should be configured with one of multiple families of products.
-\item a family of related product objects is designed to be used together, and you need to enforce this
-constraint.
-\item you want to provide a class library of products, and you want to reveal just their interfaces, not
-their implementations.
-\end{enumerate}   
+\subsection{Builder Pattern}
+Builder pattern is used when there is a construction of a complex object from its representation so that the same construction process can be used to create different representations depending on the input.
 
-The class diagram for an abstract factory is as follows:
+It is used when,
+\begin{itemize}
+\item There is an algorithm for creating a complex object which is independent of the parts that make up the object.
+\item The above algorithm must allow different representations of constructing the complex object.
+\end{itemize}
 
 \begin{center}
-\includegraphics[scale=0.5]{AbstractFactory.png}
+\includegraphics[scale=0.5]{Builder.png}
 \end{center}
 
-The participants are 
+The participants are:
 \begin{itemize}
-\item \textbf{Abstract Factory} declares an interface for operations that create abstract product objects.
-\item \textbf{ConcreteFactory} implements the operations to create concrete product objects.
-\item \textbf{Product} declares an interface for a type of product object.
-\item \textbf{ConcreteProduct} defines a product object to be created by the corresponding concrete factory. It also implements the AbstractProduct interface.
-\item \textbf{Item} uses only interfaces declared by AbstractFactory and AbstractProduct classes.
-
-
+\item \textbf{Builder} Specifies the abstract interface for creating an object
+\item \textbf{Concrete Builder} Implements the builder interface and keeps track of the representation it creates
+\item \textbf{Director} Creates objects using builder interface.
 \end{itemize}
 
 \subsection{Factory Method}
@@ -362,8 +353,9 @@ which helper subclass is the delegate.
 
 We could observe the following design patterns between classes defined in parser folder.
 
-\subsubsection*{Abstract Factory} 
+\subsubsection*{Builder} 
 
+Based on the token that it receives at the run-time Normal Production either builds up a choice or regEx or Sequence and so on. Hence, this is an example of the builder pattern.
 \begin{center}
 \includegraphics[scale=0.4]{AbstractFactory1.png}
 \end{center} 

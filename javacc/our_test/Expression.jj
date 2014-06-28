@@ -1,0 +1,22 @@
+PARSER_BEGIN(Expression)
+
+/** Simple brace matcher. */
+public class Expression {
+
+  /** Main entry point. */
+  public static void main(String args[]) throws ParseException {
+    Expression parser = new Expression(System.in);
+    parser.S();
+  }
+
+}
+
+PARSER_END(Expression)
+
+/** Root production. */
+void S() :
+{}
+{
+  "(" "("  "4" "-" "1" "9" "3" ")" "/" "7" ")" "*" "9" "+" "2" "7" "6" "+" "("  "3" ")"
+}
+

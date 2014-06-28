@@ -1,0 +1,39 @@
+PARSER_BEGIN(our_example)
+
+/** Simple brace matcher. */
+public class our_example {
+
+  /** Main entry point. */
+  public static void main(String args[]) throws ParseException {
+    our_example parser = new our_example(System.in);
+    parser.S();
+  }
+
+}
+
+PARSER_END(our_example)
+
+/** Root production. */
+void S() :
+{}
+{
+  E() 
+}
+
+void E() :
+{}
+{
+  (E() "+" T()) | (E() "-" T()) | "(" E() ")" | T()
+}
+
+void T() :
+{}
+{
+  (T() "*" F()) | (T() "/" F()) | F()
+}
+
+void F() :
+{}
+{
+  ( "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" )+ 
+}

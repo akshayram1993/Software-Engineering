@@ -18,7 +18,7 @@
 \contentsline {section}{\numberline {3.1}Outline of the code}{9}
 \contentsline {section}{\numberline {3.2}Class Hierarchies}{10}
 \contentsline {section}{\numberline {3.3}Design Patterns}{11}
-\contentsline {subsection}{\numberline {3.3.1}Abstract Factory}{11}
-\contentsline {subsection}{\numberline {3.3.2}Factory Method}{12}
+\contentsline {subsection}{\numberline {3.3.1}Builder Pattern}{11}
+\contentsline {subsection}{\numberline {3.3.2}Factory Method}{11}
 \contentsline {subsection}{\numberline {3.3.3}Design Patterns Observed}{12}
-\contentsline {chapter}{\numberline {4}Code Added}{14}
+\contentsline {chapter}{\numberline {4}Code Added}{13}

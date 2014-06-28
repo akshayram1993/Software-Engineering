@@ -44,7 +44,7 @@ import org.javacc.parser.RStringLiteral;
 import static org.javacc.parser.JavaCCGlobals.*;
 
 public class ParseEngine {
-	public class ParseTableEntry {
+	private class ParseTableEntry {
 		int s_r_a; // -1 - invalid, 0 - shift, 1 - reduce, 2 - accept
 		int state; // -1 for accept
 		NormalProduction p;
